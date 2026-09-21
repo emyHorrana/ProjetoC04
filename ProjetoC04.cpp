@@ -8,6 +8,16 @@ using namespace std;
 // Emily Horrana Lima Rodrigues Armando 787
 // Vinicius Oliveira Braga 743
 
+struct Item
+{
+    string nome;
+    string dono;
+    string propriedadeMagica;
+    int id;
+    int raridade;      // 0 a 100
+};
+
+
 int inserirItem(string nomeItem, string nomeDono, string propriedadeMagica, int id, int raridade)
 {
     cout << "Funcionalidade em construção" << endl;
