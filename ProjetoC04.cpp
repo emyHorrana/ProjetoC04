@@ -10,7 +10,7 @@ using namespace std;
 // Emily Horrana Lima Rodrigues Armando 787
 // Vinicius Oliveira Braga 743
 
-struct Item
+struct Item //representa um item do jogo
 {
     string nome;
     string dono;
@@ -19,68 +19,69 @@ struct Item
     int raridade;
 };
 
-struct Aresta
+struct Aresta //representa uma ligacao entre dois itens no grafo
 {
     int origem;  
     int destino;
-    int peso;
+    int peso; //similaridade entre dois itens
 };
 
-const int MAX_ITENS = 40000;
-Item itens[MAX_ITENS];
-int quantidadeItens = 0;
+const int MAX_ITENS = 40000; //quantidade maxima de itens que pode armazenar
+Item itens[MAX_ITENS]; //vetor que armazena ate 40000 itens
+int quantidadeItens = 0; //representa quantos itens foram cadastrados
 
-list<Aresta> grafo[MAX_ITENS];
+list<Aresta> grafo[MAX_ITENS]; //cria ate 40000 listas de adjacencia
 
-int encontrarItem(int id)
+int encontrarItem(int id) //recebe um id 
 {
-    for(int i = 0; i < quantidadeItens; i++)
+    for(int i = 0; i < quantidadeItens; i++) //percorre os itens cadastrados
     {
-        if(itens[i].id == id)
+        if(itens[i].id == id) //compara o id do item com o id procurado
         {
-            return i;
+            return i; //se encontrar retorna a posicao
         }
     }
-    return -1;
+    return -1; //caso nao encontre
 }
 
-int inserirItem(string nomeItem, string nomeDono, string propriedadeMagica, int id, int raridade)
+int inserirItem(string nomeItem, string nomeDono, string propriedadeMagica, int id, int raridade) //a funcao cadastra um novo item
 {
-    if(quantidadeItens >= MAX_ITENS) {
+    if(quantidadeItens >= MAX_ITENS) { //verifica se o vetor ja esta cheio
         cout << "Inventário cheio!" << endl;
         return 0;
     }
 
-    if(encontrarItem(id) != -1) {
-        cout << "Erro: Já existe um item com o ID " << id << "!" << endl;
+    if(encontrarItem(id) != -1) { //se encontrarItem retornar algo diferente de -1, e porque ja existe um item com esse id
+        cout << "Erro: Já existe um item com o ID " << id << "!" << endl; //nao deixa cadastrar
         return 0;
     }
 
+    //salva o item
     itens[quantidadeItens].nome = nomeItem;
     itens[quantidadeItens].dono = nomeDono;
     itens[quantidadeItens].propriedadeMagica = propriedadeMagica;
     itens[quantidadeItens].id = id;
     itens[quantidadeItens].raridade = raridade;
 
-    quantidadeItens++;
+    quantidadeItens++; //aumenta a quantidade
 
     cout << "Item inserido com sucesso!" << endl;
     return 1;
 }
 
-int cadastrarSimilaridade(int idItem1, int idItem2, int similaridade)
+int cadastrarSimilaridade(int idItem1, int idItem2, int similaridade) //recebe o id do primeiro e do segundo e o valor da similaridade
 {
+    //transforma os ids em posicoes
     int indice1 = encontrarItem(idItem1);
     int indice2 = encontrarItem(idItem2);
 
-    if(indice1 == -1 || indice2 == -1) {
+    if(indice1 == -1 || indice2 == -1) { //caso um dos dois itens nao exista
         cout << "Erro: Um ou ambos os IDs não foram encontrados." << endl;
         return 0;
     }
 
-    // Cria a aresta usando as posições reais no vetor
-    grafo[indice1].push_back({indice1, indice2, similaridade});
-    grafo[indice2].push_back({indice2, indice1, similaridade});
+    grafo[indice1].push_back({indice1, indice2, similaridade}); //adiciona a relacao a lista de adjacencia do primeiro item
+    grafo[indice2].push_back({indice2, indice1, similaridade}); //duas vezes porque o grafo e nao direcionado
 
     cout << "Similaridade cadastrada com sucesso!" << endl;
     return 1;
@@ -88,26 +89,26 @@ int cadastrarSimilaridade(int idItem1, int idItem2, int similaridade)
 
 int buscarItensSimilares(int idItem, string nomeDono, int valorMinimo)
 {
-    int posicaoItem = encontrarItem(idItem);
+    int posicaoItem = encontrarItem(idItem); //primeiro encontra o item
 
-    if(posicaoItem == -1)
+    if(posicaoItem == -1) //se nao encontrar
     {
         cout << "Item nao encontrado!" << endl;
         return 0;
     }
 
-    list<Aresta>::iterator it;
+    list<Aresta>::iterator it; //iterator e usado para percorrer os elementos da lista de adjacencia
     bool encontrou = false;
 
     cout << "Itens similares encontrados:" << endl;
 
-    for(it = grafo[posicaoItem].begin(); it != grafo[posicaoItem].end(); it++)
+    for(it = grafo[posicaoItem].begin(); it != grafo[posicaoItem].end(); it++) //percorrendo todas as arestas da lista de adjacencia
     {
-        if(it->peso > valorMinimo)
+        if(it->peso > valorMinimo) //se a similaridade for maior que o valor minimo
         {
-            int posicaoDestino = it->destino;
+            int posicaoDestino = it->destino; //guarda a posicao de destino do item
 
-            if(itens[posicaoDestino].dono != nomeDono) 
+            if(itens[posicaoDestino].dono != nomeDono) //se o dono do item que encontrei for diferente do jogador informado na busca...
             {
                 cout << "ID: " << itens[posicaoDestino].id << endl;
                 cout << "Nome: " << itens[posicaoDestino].nome << endl;
@@ -116,12 +117,12 @@ int buscarItensSimilares(int idItem, string nomeDono, int valorMinimo)
                 cout << "Raridade: " << itens[posicaoDestino].raridade << endl;
                 cout << "Similaridade: " << it->peso << endl;
                 cout << "-----------------------------" << endl;
-                encontrou = true;
+                encontrou = true; //quando encontra
             }
         }
     }
 
-    if (!encontrou) {
+    if (!encontrou) { //caso nao encontrou
         cout << "Nenhum item encontrado com esses critérios." << endl;
     }
 
@@ -219,13 +220,7 @@ int main()
                 cout << "Raridade (0 a 100): ";
                 cin >> raridade;
 
-                inserirItem(
-                    nomeItem,
-                    nomeDono,
-                    propriedadeMagica,
-                    id,
-                    raridade
-                );
+                inserirItem(nomeItem,nomeDono,propriedadeMagica,id,raridade);
 
                 break;
 
@@ -241,11 +236,7 @@ int main()
                 cin >> similaridade;
 
 
-                cadastrarSimilaridade(
-                    idItem1,
-                    idItem2,
-                    similaridade
-                );
+                cadastrarSimilaridade(idItem1,idItem2,similaridade);
 
                 break;
 
@@ -261,11 +252,7 @@ int main()
                 cin >> valorMinimo;
 
 
-                buscarItensSimilares(
-                    id,
-                    nomeDono,
-                    valorMinimo
-                );
+                buscarItensSimilares(id,nomeDono,valorMinimo);
 
                 break;
 
