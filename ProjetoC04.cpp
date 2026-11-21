@@ -1,4 +1,3 @@
-
 #include <iostream>
 #include <string>
 #include <list>
@@ -36,7 +35,7 @@ struct Item
 };
 
 // Insere um item na árvore binária em ordem alfabética
-void insert(Item* &current, string nome, string dono,string propriedadeMagica, int id, int raridade)
+void insert(Item* &current, string nome, string dono, string propriedadeMagica, int id, int raridade)
 {
     if (current == NULL) {
         current = new Item;
@@ -63,7 +62,6 @@ void insert(Item* &current, string nome, string dono,string propriedadeMagica, i
 void insertRaridade(Item* &current, string nome, string dono, string propriedadeMagica, int id, int raridade)
 {
     if (current == NULL) {
-
         current = new Item;
 
         current->id = id;
@@ -74,18 +72,16 @@ void insertRaridade(Item* &current, string nome, string dono, string propriedade
 
         current->left = NULL;
         current->right = NULL;
-
         current->leftRaridade = NULL;
         current->rightRaridade = NULL;
 
-    }
-    else if (raridade < current->raridade || (raridade == current->raridade && nome < current->nome)) {
+    } else if (raridade < current->raridade || (raridade == current->raridade && nome < current->nome)) {
         insertRaridade(current->leftRaridade, nome, dono, propriedadeMagica, id, raridade);
-    }
-    else {
+    } else {
         insertRaridade(current->rightRaridade, nome, dono, propriedadeMagica, id, raridade);
     }
 }
+
 // Mostra os itens em ordem alfabética
 void show_in_order(Item* current)
 {
@@ -120,12 +116,24 @@ Item *search(Item *current, string nome)
     }
 }
 
-// Libera a memória utilizada pela árvore binária
+// Libera a memória utilizada pela árvore binária de nomes
 void destruct(Item * &current)
 {
     if (current != NULL) {
         destruct(current->left);
         destruct(current->right);
+
+        delete(current);
+        current = NULL;
+    }
+}
+
+// Libera a memória utilizada pela árvore binária de raridades
+void destructRaridade(Item * &current)
+{
+    if (current != NULL) {
+        destructRaridade(current->leftRaridade);
+        destructRaridade(current->rightRaridade);
 
         delete(current);
         current = NULL;
@@ -149,7 +157,7 @@ int encontrarItem(int id)
     return -1;
 }
 
-int inserirItem(string nomeItem, string nomeDono,string propriedadeMagica, int id, int raridade)
+int inserirItem(string nomeItem, string nomeDono, string propriedadeMagica, int id, int raridade)
 {
     if (quantidadeItens >= MAX_ITENS) {
         cout << "Inventário cheio!" << endl;
@@ -202,6 +210,7 @@ int cadastrarSimilaridade(int idItem1, int idItem2, int similaridade)
         cout << "Erro: A similaridade deve estar entre 0 e 100!" << endl;
         return 0;
     }
+
     // Procura os dois itens pelo ID
     int indice1 = encontrarItem(idItem1);
     int indice2 = encontrarItem(idItem2);
@@ -210,6 +219,7 @@ int cadastrarSimilaridade(int idItem1, int idItem2, int similaridade)
         cout << "Erro: Um ou ambos os IDs não foram encontrados." << endl;
         return 0;
     }
+
     list<Aresta>::iterator it;
 
     for (it = grafo[indice1].begin(); it != grafo[indice1].end(); it++) {
@@ -273,12 +283,14 @@ int buscarItensSimilares(int idItem, string nomeDono, int valorMinimo)
     return 0;
 }
 
-// Funcionalidades da Entrega Parcial 4 (Em construção)
+// =========================================================================
+// Funcionalidades da Entrega Parcial 4
+// =========================================================================
 
-// Lista os itens em ordem decrescente de raridade
+// Passo 8: Lista os itens em ordem decrescente de raridade
 int listarItensPorRaridade(Item* current)
 {
-     if (current == NULL) {
+    if (current == NULL) {
         return 0;
     }
 
@@ -300,14 +312,24 @@ int listarItensPorRaridade(Item* current)
     return 1;
 }
 
-// Conta os itens que possuem a mesma propriedade mágica
-int contarPropriedadeMagica(string propriedadeMagica)
+// Passo 9: Conta e retorna a quantidade de itens com a mesma propriedade mágica
+int contarPropriedadeMagica(Item* current, string propriedadeMagica)
 {
-    cout << "Funcionalidade em construção" << endl;
-    return 0;
+    if (current == NULL) {
+        return 0;
+    }
+
+    int contador = 0;
+    if (current->propriedadeMagica == propriedadeMagica) {
+        contador = 1;
+    }
+
+    return contador
+         + contarPropriedadeMagica(current->left, propriedadeMagica)
+         + contarPropriedadeMagica(current->right, propriedadeMagica);
 }
 
-// Remove os itens que possuem raridade abaixo do valor informado
+// Passo 10 (Em construção): Remove os itens que possuem raridade abaixo do valor informado
 int removerItensMenosRaros(int raridadeMinima)
 {
     cout << "Funcionalidade em construção" << endl;
@@ -319,13 +341,13 @@ int main()
 {
     setlocale(LC_ALL, "pt_BR.UTF-8");
 
-    Item *rootNome = NULL; // Raiz da árvore binária
-    Item *rootRaridade = NULL;
+    Item *rootNome = NULL; // Raiz da árvore binária por nome
+    Item *rootRaridade = NULL; // Raiz da árvore binária por raridade
 
     int opcao = -1;
 
     int id, raridade, idItem1, idItem2;
-    int similaridade, valorMinimo, raridadeMinima;
+    int similaridade, valorMinimo, raridadeMinima, qtdPropriedade;
 
     string nomeItem, nomeDono, propriedadeMagica;
     string descarte;
@@ -396,15 +418,16 @@ int main()
 
                 cin.ignore(10000, '\n');
 
-                // Só insere na árvore se o cadastro for válido
+                // Só insere nas árvores se o cadastro for válido
                 if (inserirItem(nomeItem, nomeDono, propriedadeMagica, id, raridade) == 1) {
-                    insert(rootNome, nomeItem, nomeDono,propriedadeMagica, id, raridade);
+                    insert(rootNome, nomeItem, nomeDono, propriedadeMagica, id, raridade);
                     insertRaridade(rootRaridade, nomeItem, nomeDono, propriedadeMagica, id, raridade);
 
                     cout << "Item inserido com sucesso!" << endl;
                 }
 
                 break;
+
             case 2:
 
                 cout << "ID do primeiro item: ";
@@ -497,6 +520,7 @@ int main()
                 }
 
                 break;
+
             case 5:
 
                 if (rootNome == NULL) {
@@ -517,12 +541,14 @@ int main()
                 }
 
                 break;
+
             case 7:
 
                 cout << "Propriedade magica: ";
                 getline(cin, propriedadeMagica);
 
-                contarPropriedadeMagica(propriedadeMagica);
+                qtdPropriedade = contarPropriedadeMagica(rootNome, propriedadeMagica);
+                cout << "Quantidade de itens com a propriedade \"" << propriedadeMagica << "\": " << qtdPropriedade << endl;
 
                 break;
 
@@ -550,8 +576,7 @@ int main()
                 cout << "Saindo..." << endl;
                 break;
 
-                default:
-
+            default:
                 cout << "Entrada invalida!" << endl;
                 break;
         }
@@ -559,7 +584,7 @@ int main()
     }
 
     destruct(rootNome);
-    destruct(rootRaridade);
+    destructRaridade(rootRaridade);
 
     return 0;
 }
