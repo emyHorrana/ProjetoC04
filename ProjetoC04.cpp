@@ -6,13 +6,13 @@
 
 using namespace std;
 
-const int MAX_VERTICES = 100;
-struct Ponto { double x, y; };
-
 // João Pedro Ramos Garcia 820
 // Mariana Novais Portugal 746
 // Emily Horrana Lima Rodrigues Armando 787
 // Vinicius Oliveira Braga 743
+
+const int MAX_VERTICES = 100;
+struct Ponto { double x, y; };
 
 struct Aresta
 {
@@ -82,7 +82,7 @@ Item* rotacaoEsquerdaRaridade(Item *x) {
     return y;
 }
 
-// Insere em AVL por nome.
+// Insere em AV por nome.
 void insert(Item* &current, string nome, string dono, string propriedadeMagica, int id, int raridade)
 {
     if (current == NULL) {
@@ -409,10 +409,6 @@ int buscarItensSimilares(int idItem, string nomeDono, int valorMinimo)
     return 0;
 }
 
-// =========================================================================
-// Funcionalidades da Entrega Parcial 4
-// =========================================================================
-
 // Passo 8: Lista os itens em ordem decrescente de raridade
 int listarItensPorRaridade(Item* current)
 {
@@ -559,7 +555,6 @@ int removerItensMenosRaros(int raridadeMinima, Item* &rootNome, Item* &rootRarid
     return removidos;
 }
 
-// Função principal do programa
 int main()
 {
     setlocale(LC_ALL, "pt_BR.UTF-8");
@@ -599,6 +594,7 @@ int main()
         if (cin.fail()) {
             cin.clear();
             getline(cin, descarte);
+            opcao = -1;
 
             cout << "Entrada inválida! Digite um número." << endl;
             continue;
