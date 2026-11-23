@@ -5,14 +5,31 @@ Ana
 Fogo
 101
 90
+# POLIGONO DA ABERTURA DA BOLSA (4 vertices)
+4
+0 0
+10 0
+10 10
+0 10
+# CONTORNO CONVEXO DO ITEM ESPADA (3 vertices)
+3
+2 2
+4 2
+3 4
 
 # OPCAO 1 - CADASTRAR O ITEM ESCUDO
+# Nos próximos cadastros, informar somente o contorno do item.
 1
 Escudo
 Bruno
 Terra
 102
 40
+# CONTORNO CONVEXO DO ITEM ESCUDO (3 vertices)
+3
+2 2
+4 2
+3 4
 
 # OPCAO 1 - CADASTRAR O ITEM POCAO
 1
@@ -21,6 +38,11 @@ Carlos
 Cura
 103
 70
+# CONTORNO CONVEXO DO ITEM POCAO (3 vertices)
+3
+2 2
+4 2
+3 4
 
 # OPCAO 1 - CADASTRAR O ITEM ARCO
 1
@@ -29,6 +51,11 @@ Mariana
 Vento
 104
 60
+# CONTORNO CONVEXO DO ITEM ARCO (3 vertices)
+3
+2 2
+4 2
+3 4
 
 # OPCAO 2 - SIMILARIDADE ENTRE ESPADA E ESCUDO
 # Similaridade: 85
@@ -79,8 +106,11 @@ Cajado
 Fogo
 
 # OPCAO 8 - REMOVER ITENS COM RARIDADE ABAIXO DE 50
+# Remove os itens com raridade menor que 50.
 8
 50
 
 # OPCAO 0 - ENCERRAR O PROGRAMA
 0
+
+output\ProjetoC04.exe < testes.txt

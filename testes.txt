@@ -1,27 +1,49 @@
+
 1
 Espada
 Ana
 Fogo
 101
 90
+4
+0 0
+10 0
+10 10
+0 10
+3
+2 2
+4 2
+3 4
 1
 Escudo
 Bruno
 Terra
 102
 40
+3
+2 2
+4 2
+3 4
 1
 Pocao
 Carlos
 Cura
 103
 70
+3
+2 2
+4 2
+3 4
 1
 Arco
 Mariana
 Vento
 104
 60
+3
+2 2
+4 2
+3 4
 2
 101
 102

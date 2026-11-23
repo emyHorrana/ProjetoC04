@@ -162,7 +162,7 @@ void show_in_order(Item* current)
         cout << "Dono: " << current->dono << endl;
         cout << "Propriedade magica: " << current->propriedadeMagica << endl;
         cout << "Raridade: " << current->raridade << endl;
-        cout << "-----------------------------" << endl;
+        cout << "-----------------------------\n" << endl;
 
         show_in_order(current->right);
     }
@@ -255,8 +255,9 @@ bool pontoDentroDoConvexo(Ponto q, Ponto p[], int n) {
 
 int lerPoligono(const string &rotulo, Ponto p[]) {
     int n;
-    cout << "Quantidade de vertices do " << rotulo << " (minimo 3): ";
+    cout << "\nQuantidade de vertices do " << rotulo << " (minimo 3): ";
     cin >> n;
+    if (!cin.fail()) cout << n << endl;
     if (cin.fail() || n < 3 || n > MAX_VERTICES) {
         cin.clear(); cin.ignore(10000, '\n');
         return 0;
@@ -264,6 +265,7 @@ int lerPoligono(const string &rotulo, Ponto p[]) {
     for (int i = 0; i < n; ++i) {
         cout << "Vertice " << i+1 << " (x y): ";
         cin >> p[i].x >> p[i].y;
+        if (!cin.fail()) cout << p[i].x << " " << p[i].y << endl;
         if (cin.fail()) { cin.clear(); cin.ignore(10000, '\n'); return 0; }
     }
     cin.ignore(10000, '\n');
@@ -375,7 +377,7 @@ int buscarItensSimilares(int idItem, string nomeDono, int valorMinimo)
     list<Aresta>::iterator it;
     bool encontrou = false;
 
-    cout << "Itens similares encontrados:" << endl;
+    cout << "\nItens similares encontrados:" << endl;
 
     // Percorre as conexões do item no grafo
     for (it = grafo[posicaoItem].begin(); it != grafo[posicaoItem].end(); it++) {
@@ -393,7 +395,7 @@ int buscarItensSimilares(int idItem, string nomeDono, int valorMinimo)
                      << itens[posicaoDestino].propriedadeMagica << endl;
                 cout << "Raridade: " << itens[posicaoDestino].raridade << endl;
                 cout << "Similaridade: " << it->peso << endl;
-                cout << "-----------------------------" << endl;
+                cout << "-----------------------------\n" << endl;
 
                 encontrou = true;
             }
@@ -428,7 +430,7 @@ int listarItensPorRaridade(Item* current)
          << current->propriedadeMagica << endl;
     cout << "Raridade: " << current->raridade << endl;
 
-    cout << "-----------------------------" << endl;
+    cout << "-----------------------------\n" << endl;
 
     // Percorre a subarvore da esquerda
     listarItensPorRaridade(current->leftRaridade);
@@ -575,7 +577,7 @@ int main()
 
     while (opcao != 0) {
 
-        cout << "=================================================" << endl;
+        cout << "\n=================================================" << endl;
         cout << "                    M E N U                      " << endl;
         cout << "=================================================" << endl;
         cout << "0. Sair                                          " << endl;
@@ -591,6 +593,7 @@ int main()
 
         cout << "Escolha uma opção: ";
         cin >> opcao;
+        if (!cin.fail()) cout << opcao << endl;
 
         // Verifica se a opção digitada é numérica
         if (cin.fail()) {
@@ -608,15 +611,19 @@ int main()
 
                 cout << "Nome do item: ";
                 getline(cin, nomeItem);
+                cout << nomeItem << endl;
 
                 cout << "Nome do dono: ";
                 getline(cin, nomeDono);
+                cout << nomeDono << endl;
 
                 cout << "Propriedade magica: ";
                 getline(cin, propriedadeMagica);
+                cout << propriedadeMagica << endl;
 
                 cout << "ID: ";
                 cin >> id;
+                if (!cin.fail()) cout << id << endl;
 
                 if (cin.fail()) {
                     cin.clear();
@@ -628,6 +635,7 @@ int main()
 
                 cout << "Raridade (0 a 100): ";
                 cin >> raridade;
+                if (!cin.fail()) cout << raridade << endl;
 
                 if (cin.fail()) {
                     cin.clear();
@@ -674,6 +682,7 @@ int main()
 
                 cout << "ID do primeiro item: ";
                 cin >> idItem1;
+                if (!cin.fail()) cout << idItem1 << endl;
 
                 if (cin.fail()) {
                     cin.clear();
@@ -685,6 +694,7 @@ int main()
 
                 cout << "ID do segundo item: ";
                 cin >> idItem2;
+                if (!cin.fail()) cout << idItem2 << endl;
 
                 if (cin.fail()) {
                     cin.clear();
@@ -696,6 +706,7 @@ int main()
 
                 cout << "Valor da similaridade: ";
                 cin >> similaridade;
+                if (!cin.fail()) cout << similaridade << endl;
 
                 if (cin.fail()) {
                     cin.clear();
@@ -716,6 +727,7 @@ int main()
 
                 cout << "ID do item: ";
                 cin >> id;
+                if (!cin.fail()) cout << id << endl;
 
                 if (cin.fail()) {
                     cin.clear();
@@ -729,9 +741,11 @@ int main()
 
                 cout << "Nome do jogador cujos itens não devem ser incluídos: ";
                 getline(cin, nomeDono);
+                cout << nomeDono << endl;
 
                 cout << "Valor minimo de similaridade: ";
                 cin >> valorMinimo;
+                if (!cin.fail()) cout << valorMinimo << endl;
 
                 if (cin.fail()) {
                     cin.clear();
@@ -754,6 +768,7 @@ int main()
 
                 cout << "Nome do item a ser verificado: ";
                 getline(cin, nomeItem);
+                cout << nomeItem << endl;
 
                 if (search(rootNome, nomeItem) != NULL) {
                     cout << "Item encontrado!" << endl;
@@ -768,7 +783,7 @@ int main()
                 if (rootNome == NULL) {
                     cout << "O inventário está vazio." << endl;
                 } else {
-                    cout << "--- ITENS EM ORDEM ALFABÉTICA ---" << endl;
+                    cout << "\n--- ITENS EM ORDEM ALFABÉTICA ---" << endl;
                     show_in_order(rootNome);
                 }
 
@@ -778,7 +793,7 @@ int main()
                 if (rootRaridade == NULL) {
                     cout << "O inventário está vazio." << endl;
                 } else {
-                    cout << "--- ITENS EM ORDEM DECRESCENTE DE RARIDADE ---" << endl;
+                    cout << "\n--- ITENS EM ORDEM DECRESCENTE DE RARIDADE ---" << endl;
                     listarItensPorRaridade(rootRaridade);
                 }
 
@@ -788,6 +803,7 @@ int main()
 
                 cout << "Propriedade magica: ";
                 getline(cin, propriedadeMagica);
+                cout << propriedadeMagica << endl;
 
                 qtdPropriedade = contarPropriedadeMagica(rootNome, propriedadeMagica);
                 cout << "Quantidade de itens com a propriedade \"" << propriedadeMagica << "\": " << qtdPropriedade << endl;
@@ -797,6 +813,7 @@ int main()
             case 8:
                 cout << "Raridade minima: ";
                 cin >> raridadeMinima;
+                if (!cin.fail()) cout << raridadeMinima << endl;
 
                 if (cin.fail()) {
                     cin.clear();
