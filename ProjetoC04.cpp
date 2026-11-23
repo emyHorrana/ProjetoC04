@@ -2,8 +2,12 @@
 #include <string>
 #include <list>
 #include <locale.h>
+#include <cmath>
 
 using namespace std;
+
+const int MAX_VERTICES = 100;
+struct Ponto { double x, y; };
 
 // João Pedro Ramos Garcia 820
 // Mariana Novais Portugal 746
@@ -24,6 +28,8 @@ struct Item
     string propriedadeMagica;
     int id;
     int raridade;
+    Ponto *contorno;
+    int quantidadeContorno;
 
     // Ponteiros da árvore organizada por nome
     Item *left;
@@ -32,9 +38,51 @@ struct Item
     // Ponteiros da árvore organizada por raridade
     Item *leftRaridade;
     Item *rightRaridade;
+    int alturaNome;
+    int alturaRaridade;
 };
 
-// Insere um item na árvore binária em ordem alfabética
+Ponto aberturaBolsa[MAX_VERTICES];
+int quantidadeAbertura = 0;
+bool aberturaCadastrada = false;
+Ponto contornoItemAtual[MAX_VERTICES];
+int quantidadeContornoAtual = 0;
+
+int maior(int a, int b) { return a > b ? a : b; }
+
+int alturaNome(Item *n) { return n == NULL ? 0 : n->alturaNome; }
+int alturaRaridade(Item *n) { return n == NULL ? 0 : n->alturaRaridade; }
+
+Item* rotacaoDireitaNome(Item *y) {
+    Item *x = y->left, *t = x->right;
+    x->right = y; y->left = t;
+    y->alturaNome = 1 + maior(alturaNome(y->left), alturaNome(y->right));
+    x->alturaNome = 1 + maior(alturaNome(x->left), alturaNome(x->right));
+    return x;
+}
+Item* rotacaoEsquerdaNome(Item *x) {
+    Item *y = x->right, *t = y->left;
+    y->left = x; x->right = t;
+    x->alturaNome = 1 + maior(alturaNome(x->left), alturaNome(x->right));
+    y->alturaNome = 1 + maior(alturaNome(y->left), alturaNome(y->right));
+    return y;
+}
+Item* rotacaoDireitaRaridade(Item *y) {
+    Item *x = y->leftRaridade, *t = x->rightRaridade;
+    x->rightRaridade = y; y->leftRaridade = t;
+    y->alturaRaridade = 1 + maior(alturaRaridade(y->leftRaridade), alturaRaridade(y->rightRaridade));
+    x->alturaRaridade = 1 + maior(alturaRaridade(x->leftRaridade), alturaRaridade(x->rightRaridade));
+    return x;
+}
+Item* rotacaoEsquerdaRaridade(Item *x) {
+    Item *y = x->rightRaridade, *t = y->leftRaridade;
+    y->leftRaridade = x; x->rightRaridade = t;
+    x->alturaRaridade = 1 + maior(alturaRaridade(x->leftRaridade), alturaRaridade(x->rightRaridade));
+    y->alturaRaridade = 1 + maior(alturaRaridade(y->leftRaridade), alturaRaridade(y->rightRaridade));
+    return y;
+}
+
+// Insere em AVL por nome.
 void insert(Item* &current, string nome, string dono, string propriedadeMagica, int id, int raridade)
 {
     if (current == NULL) {
@@ -50,13 +98,22 @@ void insert(Item* &current, string nome, string dono, string propriedadeMagica, 
         current->right = NULL;
         current->leftRaridade = NULL;
         current->rightRaridade = NULL;
+        current->alturaNome = 1;
+        current->alturaRaridade = 1;
+        current->contorno = NULL;
+        current->quantidadeContorno = 0;
 
     } else if (nome < current->nome) {
         insert(current->left, nome, dono, propriedadeMagica, id, raridade);
-
     } else {
         insert(current->right, nome, dono, propriedadeMagica, id, raridade);
     }
+    current->alturaNome = 1 + maior(alturaNome(current->left), alturaNome(current->right));
+    int b = alturaNome(current->left) - alturaNome(current->right);
+    if (b > 1 && nome < current->left->nome) current = rotacaoDireitaNome(current);
+    else if (b < -1 && nome >= current->right->nome) current = rotacaoEsquerdaNome(current);
+    else if (b > 1) { current->left = rotacaoEsquerdaNome(current->left); current = rotacaoDireitaNome(current); }
+    else if (b < -1) { current->right = rotacaoDireitaNome(current->right); current = rotacaoEsquerdaNome(current); }
 }
 
 void insertRaridade(Item* &current, string nome, string dono, string propriedadeMagica, int id, int raridade)
@@ -74,12 +131,24 @@ void insertRaridade(Item* &current, string nome, string dono, string propriedade
         current->right = NULL;
         current->leftRaridade = NULL;
         current->rightRaridade = NULL;
+        current->alturaNome = 1;
+        current->alturaRaridade = 1;
+        current->contorno = NULL;
+        current->quantidadeContorno = 0;
 
     } else if (raridade < current->raridade || (raridade == current->raridade && nome < current->nome)) {
         insertRaridade(current->leftRaridade, nome, dono, propriedadeMagica, id, raridade);
     } else {
         insertRaridade(current->rightRaridade, nome, dono, propriedadeMagica, id, raridade);
     }
+    current->alturaRaridade = 1 + maior(alturaRaridade(current->leftRaridade), alturaRaridade(current->rightRaridade));
+    int b = alturaRaridade(current->leftRaridade) - alturaRaridade(current->rightRaridade);
+    bool menor = raridade < current->raridade || (raridade == current->raridade && nome < current->nome);
+    bool maior = raridade > current->raridade || (raridade == current->raridade && nome >= current->nome);
+    if (b > 1 && menor) current = rotacaoDireitaRaridade(current);
+    else if (b < -1 && maior) current = rotacaoEsquerdaRaridade(current);
+    else if (b > 1) { current->leftRaridade = rotacaoEsquerdaRaridade(current->leftRaridade); current = rotacaoDireitaRaridade(current); }
+    else if (b < -1) { current->rightRaridade = rotacaoDireitaRaridade(current->rightRaridade); current = rotacaoEsquerdaRaridade(current); }
 }
 
 // Mostra os itens em ordem alfabética
@@ -143,7 +212,7 @@ void destructRaridade(Item * &current)
 const int MAX_ITENS = 40000;
 Item itens[MAX_ITENS];
 int quantidadeItens = 0;
-
+list<Aresta> grafoNovo[MAX_ITENS];
 list<Aresta> grafo[MAX_ITENS];
 
 int encontrarItem(int id)
@@ -155,6 +224,57 @@ int encontrarItem(int id)
     }
 
     return -1;
+}
+
+double produtoVetorial(Ponto a, Ponto b, Ponto c) {
+    return (b.x-a.x)*(c.y-a.y) - (b.y-a.y)*(c.x-a.x);
+}
+
+bool poligonoConvexo(Ponto p[], int n) {
+    if (n < 3 || n > MAX_VERTICES) return false;
+    int sinal = 0;
+    for (int i = 0; i < n; ++i) {
+        double c = produtoVetorial(p[i], p[(i+1)%n], p[(i+2)%n]);
+        if (fabs(c) < 1e-9) continue;
+        int atual = c > 0 ? 1 : -1;
+        if (sinal && sinal != atual) return false;
+        sinal = atual;
+    }
+    return sinal != 0;
+}
+
+bool pontoDentroDoConvexo(Ponto q, Ponto p[], int n) {
+    double area = 0;
+    for (int i = 0; i < n; ++i)
+        area += p[i].x*p[(i+1)%n].y - p[(i+1)%n].x*p[i].y;
+    double orientacao = area >= 0 ? 1.0 : -1.0;
+    for (int i = 0; i < n; ++i)
+        if (orientacao * produtoVetorial(p[i], p[(i+1)%n], q) < -1e-9) return false;
+    return true;
+}
+
+int lerPoligono(const string &rotulo, Ponto p[]) {
+    int n;
+    cout << "Quantidade de vertices do " << rotulo << " (minimo 3): ";
+    cin >> n;
+    if (cin.fail() || n < 3 || n > MAX_VERTICES) {
+        cin.clear(); cin.ignore(10000, '\n');
+        return 0;
+    }
+    for (int i = 0; i < n; ++i) {
+        cout << "Vertice " << i+1 << " (x y): ";
+        cin >> p[i].x >> p[i].y;
+        if (cin.fail()) { cin.clear(); cin.ignore(10000, '\n'); return 0; }
+    }
+    cin.ignore(10000, '\n');
+    return n;
+}
+
+bool itemCabeNaAbertura(Ponto contorno[], int quantidade) {
+    if (!poligonoConvexo(contorno, quantidade) || !poligonoConvexo(aberturaBolsa, quantidadeAbertura)) return false;
+    for (int i = 0; i < quantidade; ++i)
+        if (!pontoDentroDoConvexo(contorno[i], aberturaBolsa, quantidadeAbertura)) return false;
+    return true;
 }
 
 int inserirItem(string nomeItem, string nomeDono, string propriedadeMagica, int id, int raridade)
@@ -190,6 +310,10 @@ int inserirItem(string nomeItem, string nomeDono, string propriedadeMagica, int 
     itens[quantidadeItens].propriedadeMagica = propriedadeMagica;
     itens[quantidadeItens].id = id;
     itens[quantidadeItens].raridade = raridade;
+    itens[quantidadeItens].contorno = new Ponto[quantidadeContornoAtual];
+    itens[quantidadeItens].quantidadeContorno = quantidadeContornoAtual;
+    for (int i = 0; i < quantidadeContornoAtual; ++i)
+        itens[quantidadeItens].contorno[i] = contornoItemAtual[i];
 
     quantidadeItens++;
 
@@ -329,11 +453,108 @@ int contarPropriedadeMagica(Item* current, string propriedadeMagica)
          + contarPropriedadeMagica(current->right, propriedadeMagica);
 }
 
-// Passo 10 (Em construção): Remove os itens que possuem raridade abaixo do valor informado
-int removerItensMenosRaros(int raridadeMinima)
+void copiarDados(Item *dest, Item *orig) {
+    dest->id = orig->id; dest->nome = orig->nome; dest->dono = orig->dono;
+    dest->propriedadeMagica = orig->propriedadeMagica; dest->raridade = orig->raridade;
+}
+
+Item* menorNome(Item *n) { while (n->left != NULL) n = n->left; return n; }
+Item* menorRaridade(Item *n) { while (n->leftRaridade != NULL) n = n->leftRaridade; return n; }
+
+void removerDaAVLNome(Item* &n, string nome) {
+    if (!n) return;
+    if (nome < n->nome) removerDaAVLNome(n->left, nome);
+    else if (nome > n->nome) removerDaAVLNome(n->right, nome);
+    else {
+        if (!n->left || !n->right) {
+            Item *filho = n->left ? n->left : n->right;
+            delete n; n = filho;
+        } else {
+            Item *s = menorNome(n->right); copiarDados(n, s);
+            removerDaAVLNome(n->right, s->nome);
+        }
+    }
+    if (!n) return;
+    n->alturaNome = 1 + maior(alturaNome(n->left), alturaNome(n->right));
+    int b = alturaNome(n->left) - alturaNome(n->right);
+    if (b > 1 && alturaNome(n->left->left) >= alturaNome(n->left->right)) n = rotacaoDireitaNome(n);
+    else if (b > 1) { n->left = rotacaoEsquerdaNome(n->left); n = rotacaoDireitaNome(n); }
+    else if (b < -1 && alturaNome(n->right->right) >= alturaNome(n->right->left)) n = rotacaoEsquerdaNome(n);
+    else if (b < -1) { n->right = rotacaoDireitaNome(n->right); n = rotacaoEsquerdaNome(n); }
+}
+
+void removerDaAVLRaridade(Item* &n, int raridade, string nome) {
+    if (!n) return;
+    if (raridade < n->raridade || (raridade == n->raridade && nome < n->nome))
+        removerDaAVLRaridade(n->leftRaridade, raridade, nome);
+    else if (raridade > n->raridade || (raridade == n->raridade && nome > n->nome))
+        removerDaAVLRaridade(n->rightRaridade, raridade, nome);
+    else {
+        if (!n->leftRaridade || !n->rightRaridade) {
+            Item *filho = n->leftRaridade ? n->leftRaridade : n->rightRaridade;
+            delete n; n = filho;
+        } else {
+            Item *s = menorRaridade(n->rightRaridade); copiarDados(n, s);
+            removerDaAVLRaridade(n->rightRaridade, s->raridade, s->nome);
+        }
+    }
+    if (!n) return;
+    n->alturaRaridade = 1 + maior(alturaRaridade(n->leftRaridade), alturaRaridade(n->rightRaridade));
+    int b = alturaRaridade(n->leftRaridade) - alturaRaridade(n->rightRaridade);
+    if (b > 1 && alturaRaridade(n->leftRaridade->leftRaridade) >= alturaRaridade(n->leftRaridade->rightRaridade)) n = rotacaoDireitaRaridade(n);
+    else if (b > 1) { n->leftRaridade = rotacaoEsquerdaRaridade(n->leftRaridade); n = rotacaoDireitaRaridade(n); }
+    else if (b < -1 && alturaRaridade(n->rightRaridade->rightRaridade) >= alturaRaridade(n->rightRaridade->leftRaridade)) n = rotacaoEsquerdaRaridade(n);
+    else if (b < -1) { n->rightRaridade = rotacaoDireitaRaridade(n->rightRaridade); n = rotacaoEsquerdaRaridade(n); }
+}
+
+// Remove raridades abaixo de R nas duas AVLs e atualiza os índices do grafo.
+int removerItensMenosRaros(int raridadeMinima, Item* &rootNome, Item* &rootRaridade)
 {
-    cout << "Funcionalidade em construção" << endl;
-    return 0;
+    const int antigos = quantidadeItens;
+    int mapa[MAX_ITENS];
+    int removidos = 0;
+    for (int i = 0; i < antigos; ++i) {
+        if (itens[i].raridade < raridadeMinima) {
+            removerDaAVLNome(rootNome, itens[i].nome);
+            removerDaAVLRaridade(rootRaridade, itens[i].raridade, itens[i].nome);
+            delete[] itens[i].contorno;
+            itens[i].contorno = NULL;
+            ++removidos;
+            mapa[i] = -1;
+        } else {
+            mapa[i] = i - removidos;
+        }
+    }
+    for (int i = 0; i < antigos; ++i) grafoNovo[i].clear();
+    for (int i = 0; i < antigos; ++i) if (mapa[i] != -1) {
+        for (list<Aresta>::iterator it = grafo[i].begin(); it != grafo[i].end(); ++it) {
+            int destinoAntigo = it->destino;
+            if (destinoAntigo >= 0 && destinoAntigo < antigos && mapa[destinoAntigo] != -1 && i < destinoAntigo) {
+                int a = mapa[i], b = mapa[destinoAntigo];
+                grafoNovo[a].push_back({a, b, it->peso});
+                grafoNovo[b].push_back({b, a, it->peso});
+            }
+        }
+    }
+    for (int i = 0; i < antigos; ++i) { grafo[i].clear(); grafo[i].swap(grafoNovo[i]); }
+
+    int novaQuantidade = quantidadeItens - removidos;
+    for (int i = 0; i < antigos; ++i) if (mapa[i] != -1 && mapa[i] != i) {
+        int destino = mapa[i];
+        itens[destino].id = itens[i].id;
+        itens[destino].nome = itens[i].nome;
+        itens[destino].dono = itens[i].dono;
+        itens[destino].propriedadeMagica = itens[i].propriedadeMagica;
+        itens[destino].raridade = itens[i].raridade;
+        itens[destino].contorno = itens[i].contorno;
+        itens[destino].quantidadeContorno = itens[i].quantidadeContorno;
+        itens[destino].left = itens[destino].right = NULL;
+        itens[destino].leftRaridade = itens[destino].rightRaridade = NULL;
+        itens[i].contorno = NULL;
+    }
+    quantidadeItens = novaQuantidade;
+    cout << removidos << " item(ns) removido(s)." << endl;
+    return removidos;
 }
 
 // Função principal do programa
@@ -418,6 +639,26 @@ int main()
 
                 cin.ignore(10000, '\n');
 
+                // A abertura é definida na primeira tentativa de cadastro.
+                if (!aberturaCadastrada) {
+                    quantidadeAbertura = lerPoligono("poligono convexo da abertura da bolsa", aberturaBolsa);
+                    if (!poligonoConvexo(aberturaBolsa, quantidadeAbertura)) {
+                        cout << "Abertura invalida: informe um poligono convexo com pelo menos 3 vertices." << endl;
+                        break;
+                    }
+                    aberturaCadastrada = true;
+                }
+
+                quantidadeContornoAtual = lerPoligono("contorno convexo do item", contornoItemAtual);
+                if (!poligonoConvexo(contornoItemAtual, quantidadeContornoAtual)) {
+                    cout << "Contorno invalido: informe um poligono convexo com pelo menos 3 vertices." << endl;
+                    break;
+                }
+                if (!itemCabeNaAbertura(contornoItemAtual, quantidadeContornoAtual)) {
+                    cout << "Item nao cabe na abertura da bolsa; cadastro cancelado." << endl;
+                    break;
+                }
+
                 // Só insere nas árvores se o cadastro for válido
                 if (inserirItem(nomeItem, nomeDono, propriedadeMagica, id, raridade) == 1) {
                     insert(rootNome, nomeItem, nomeDono, propriedadeMagica, id, raridade);
@@ -425,6 +666,7 @@ int main()
 
                     cout << "Item inserido com sucesso!" << endl;
                 }
+                quantidadeContornoAtual = 0;
 
                 break;
 
@@ -569,7 +811,7 @@ int main()
                     cout << "A raridade deve estar entre 0 e 100!" << endl;
                     break;
                 }
-                removerItensMenosRaros(raridadeMinima);
+                removerItensMenosRaros(raridadeMinima, rootNome, rootRaridade);
                 break;
 
             case 0:
@@ -585,6 +827,10 @@ int main()
 
     destruct(rootNome);
     destructRaridade(rootRaridade);
+    for (int i = 0; i < quantidadeItens; ++i) {
+        delete[] itens[i].contorno;
+        itens[i].contorno = NULL;
+    }
 
     return 0;
 }
